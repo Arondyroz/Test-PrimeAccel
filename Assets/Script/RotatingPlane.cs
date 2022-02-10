@@ -6,35 +6,33 @@ namespace PrimeAcceleratorClone
 {
     public class RotatingPlane : MonoBehaviour
     {
-        [SerializeField] private float speedRotate;
-        private Transform player;
+        public bool isOnPanel;
+        public GameObject panelStand;
+        public GameObject panelOther;
+
+        private GameObject player;
+        private float min = 0f;
+        private float max = 180f;
+        // Update is called once per frame
         private void Start()
         {
-            player = GameObject.FindGameObjectWithTag("Player").GetComponent<Transform>();
+            player = GameObject.FindGameObjectWithTag("Player");
         }
-        // Update is called once per frame
-
-        private void OnTriggerStay(Collider other)
+        void Update()
         {
-            if (other.gameObject.CompareTag("Player"))
+            float diff = (player.transform.position.x - transform.position.x) * 180;
+            float angle = diff;
+            angle = Mathf.Clamp(diff, min, max);
+            if (isOnPanel == false)
             {
-                //if (PlayerMovement.instance.playerInput == PlayerMovement.PlayerInput.LeftMove)
-                //{
-                //    transform.Rotate(0, 0, Time.deltaTime * -speedRotate, Space.Self);
-                //}
-                //else if (PlayerMovement.instance.playerInput == PlayerMovement.PlayerInput.RightMove)
-                //{
-                //    transform.Rotate(0, 0, Time.deltaTime * speedRotate, Space.Self);
-                //}
-                RotatePlane();
+                transform.eulerAngles = (Vector3.forward * angle);
+                panelStand.transform.parent = gameObject.transform;
             }
-        }
-
-        void RotatePlane()
-        {
-            Vector3 lookDir = player.position - transform.position;
-            float angle = Mathf.Atan2(lookDir.y, lookDir.x) * Mathf.Rad2Deg;
-            transform.rotation = Quaternion.AngleAxis(angle, Vector3.back);
+            else
+            {
+                panelStand.transform.parent = null;
+                gameObject.transform.position = panelOther.transform.position;
+            }
         }
     }
 }

@@ -16,6 +16,9 @@ namespace PrimeAcceleratorClone
         }
 
         [SerializeField] private float moveSpeed;
+        [SerializeField] private float accelerationSpeed;
+        private bool accelerration;
+        private float initialSpeed;
         private bool leftClick, rightClick, idle;
         private Animator anim;
         private Rigidbody rb;
@@ -36,6 +39,7 @@ namespace PrimeAcceleratorClone
             anim = GetComponent<Animator>();
             rb = GetComponent<Rigidbody>();
             playerInput = PlayerInput.Idle;
+            initialSpeed = moveSpeed;
         }
 
 
@@ -44,7 +48,24 @@ namespace PrimeAcceleratorClone
         {
             float x = Input.GetAxis("Horizontal");
             float moveDir = x * moveSpeed * Time.fixedDeltaTime;
-            rb.velocity = new Vector3(moveDir, 0f, 0f);
+            if (accelerration == false)
+            {
+                rb.velocity = new Vector3(moveDir, 0f, 0f);
+                moveSpeed = initialSpeed;
+            }
+            else
+            {
+                rb.velocity = new Vector3(moveDir, 0f, 0f);
+                if (x != 0) moveSpeed += Time.deltaTime * accelerationSpeed;
+                if (x == 0) moveSpeed = 0;
+                if (moveSpeed > initialSpeed) moveSpeed = initialSpeed;
+                if (moveSpeed <= 0) moveSpeed = 0;
+            }
+
+            if (rb.velocity.x != 0)
+            {
+                anim.SetFloat("run_multi", moveSpeed / initialSpeed);
+            }
             UpdateMovePlayer();
         }
 
@@ -67,6 +88,13 @@ namespace PrimeAcceleratorClone
             }
 
         }
+
+        public void acceleration(bool value)
+        {
+            accelerration = value;
+            moveSpeed = 0;
+        }
+
         void MovePlayer()
         {
        
@@ -78,7 +106,6 @@ namespace PrimeAcceleratorClone
                     break;
                 case PlayerInput.LeftMove:
                     anim.SetBool("B_Run", true);
-                    //rb.velocity = new Vector3(-moveSpeed * Time.fixedDeltaTime, 0f, 0f);
                     if (transform.rotation.y != 270f)
                     {
                         transform.rotation = Quaternion.Euler(0, 270f, 0);
@@ -86,7 +113,6 @@ namespace PrimeAcceleratorClone
                     break;
                 case PlayerInput.RightMove:
                     anim.SetBool("B_Run", true);
-                    //rb.velocity = new Vector3(moveSpeed * Time.fixedDeltaTime, 0f, 0f);
                     if (transform.rotation.y != 90f)
                     {
                         transform.rotation = Quaternion.Euler(0, 90f, 0);
